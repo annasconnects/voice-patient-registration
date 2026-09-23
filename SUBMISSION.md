@@ -6,9 +6,9 @@ Hi,
 
 My submission for the Voice AI Patient Registration assessment:
 
-- **Repository:** https://github.com/<you>/voice-patient-registration
-- **Phone number:** +1 (___) ___-____
-- **API base URL:** https://<your-app>.up.railway.app (interactive docs at /docs, dashboard at /dashboard)
+- **Repository:** https://github.com/annasconnects/voice-patient-registration
+- **Phone number:** +1 (708) 523-1027
+- **API base URL:** https://voice-patient-registration-production-fb5b.up.railway.app (interactive docs at /docs, dashboard at /dashboard)
 - **Credentials:** none needed. The API is open for review.
 
 Notes for testing:

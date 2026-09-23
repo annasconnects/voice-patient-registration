@@ -4,10 +4,10 @@ Call a real U.S. phone number, talk to **Ava** (an AI intake coordinator), and g
 
 | | |
 |---|---|
-| **Phone number** | `+1 (___) ___-____` ← fill in after setup |
-| **API base URL** | `https://<your-app>.up.railway.app` |
-| **Dashboard** | `https://<your-app>.up.railway.app/dashboard` |
-| **Interactive API docs** | `https://<your-app>.up.railway.app/docs` |
+| **Phone number** | **+1 (708) 523-1027** |
+| **API base URL** | https://voice-patient-registration-production-fb5b.up.railway.app |
+| **Dashboard** | https://voice-patient-registration-production-fb5b.up.railway.app/dashboard |
+| **Interactive API docs** | https://voice-patient-registration-production-fb5b.up.railway.app/docs |
 | **Credentials** | None needed. Reads and writes are open for review (optional `API_KEY` exists). |
 
 ---
@@ -193,7 +193,7 @@ All responses use `{"data": ..., "error": null}` or `{"data": null, "error": {"c
 Unexpected errors return a 500 in the same envelope, and the stack trace goes to the logs only.
 
 ```bash
-BASE=https://<your-app>.up.railway.app
+BASE=https://voice-patient-registration-production-fb5b.up.railway.app
 curl "$BASE/patients?last_name=doe"
 curl -X POST $BASE/patients -H 'content-type: application/json' -d '{
   "first_name":"Maria","last_name":"Davis","date_of_birth":"03/05/1990","sex":"Female",
