@@ -1,0 +1,19 @@
+# Render Blueprint alternative (Railway is the primary target; see README).
+# Note: Render's free web tier sleeps after ~15 min idle, which makes the first
+# call slow. Use the "starter" plan for the review window.
+services:
+  - type: web
+    name: patient-registration-api
+    runtime: docker
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: patient-registration-db, property: connectionString }
+      - key: VAPI_SECRET
+        generateValue: true
+      - key: SEED_DATA
+        value: "true"
+databases:
+  - name: patient-registration-db
+    plan: free

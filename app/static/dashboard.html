@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patient Registrations</title>
+<style>
+  :root { --bg:#f7f7f5; --panel:#fff; --text:#1d1d1b; --muted:#6b6b66; --line:#e4e4df; --accent:#2f6f5e; --pill:#e8f1ee; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161615; --panel:#1f1f1d; --text:#ecece8; --muted:#9a9a93; --line:#33332f; --accent:#6fc2a8; --pill:#23332e; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  header { padding:20px 24px 8px; display:flex; flex-wrap:wrap; gap:12px; align-items:baseline; justify-content:space-between; }
+  h1 { font-size:20px; margin:0; }
+  .muted { color:var(--muted); }
+  main { padding:8px 24px 32px; display:grid; gap:16px; grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding:8px 16px 24px; } header { padding:16px; } }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .panel h2 { font-size:14px; margin:0; padding:12px 14px; border-bottom:1px solid var(--line); }
+  .filters { display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px; border-bottom:1px solid var(--line); }
+  input { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:7px 9px; font:inherit; min-width:0; flex:1 1 140px; }
+  button { background:var(--accent); color:var(--panel); border:0; border-radius:6px; padding:7px 12px; font:inherit; cursor:pointer; }
+  .scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:9px 14px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th { font-weight:600; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.03em; }
+  tbody tr { cursor:pointer; }
+  tbody tr:hover, tbody tr.sel { background:var(--pill); }
+  dl { margin:0; padding:12px 14px; display:grid; grid-template-columns:max-content 1fr; gap:6px 14px; }
+  dt { color:var(--muted); }
+  dd { margin:0; word-break:break-word; }
+  .pill { display:inline-block; background:var(--pill); color:var(--accent); border-radius:999px; padding:1px 8px; font-size:12px; }
+  pre { white-space:pre-wrap; margin:0; padding:12px 14px; font:12px/1.5 ui-monospace,Menlo,monospace; max-height:320px; overflow:auto; border-top:1px solid var(--line); }
+  .empty { padding:18px 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Patient Registrations</h1>
+    <div class="muted">Records created by the voice agent and the REST API · refreshes every 15s</div>
+  </div>
+  <div class="muted"><a href="/docs" style="color:var(--accent)">API docs</a></div>
+</header>
+<main>
+  <section class="panel">
+    <h2 id="count">Patients</h2>
+    <form class="filters" id="filters">
+      <input name="last_name" placeholder="Last name">
+      <input name="phone_number" placeholder="Phone">
+      <input name="date_of_birth" placeholder="DOB MM/DD/YYYY">
+      <button type="submit">Search</button>
+    </form>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Name</th><th>DOB</th><th>Sex</th><th>Phone</th><th>City</th><th>Registered (UTC)</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div id="msg" class="empty muted" hidden></div>
+  </section>
+  <section class="panel">
+    <h2>Details</h2>
+    <div id="detail" class="empty muted">Select a patient to see their full record and call transcripts.</div>
+  </section>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const fmtPhone = (p) => p && p.length === 10 ? `(${p.slice(0,3)}) ${p.slice(3,6)}-${p.slice(6)}` : (p || "");
+let selected = null;
+
+function el(tag, text, cls) { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+
+async function api(path) {
+  const r = await fetch(path);
+  const body = await r.json();
+  if (body.error) throw new Error(body.error.message);
+  return body.data;
+}
+
+async function loadPatients() {
+  const params = new URLSearchParams();
+  for (const [k, v] of new FormData($("#filters"))) if (v.trim()) params.set(k, v.trim());
+  try {
+    const data = await api("/patients?" + params);
+    const rows = $("#rows"); rows.replaceChildren();
+    $("#count").textContent = `Patients (${data.length})`;
+    $("#msg").hidden = data.length > 0; $("#msg").textContent = "No patients match.";
+    for (const p of data) {
+      const tr = el("tr");
+      if (p.patient_id === selected) tr.className = "sel";
+      [ `${p.first_name} ${p.last_name}`, p.date_of_birth, p.sex, fmtPhone(p.phone_number), `${p.city}, ${p.state}`,
+        p.created_at.replace("T", " ").slice(0, 16) ].forEach(t => tr.append(el("td", t)));
+      tr.onclick = () => { selected = p.patient_id; showDetail(p); loadPatients(); };
+      rows.append(tr);
+    }
+  } catch (e) { $("#msg").hidden = false; $("#msg").textContent = "Error: " + e.message; }
+}
+
+async function showDetail(p) {
+  const box = $("#detail"); box.className = ""; box.replaceChildren();
+  const dl = el("dl");
+  const fields = [
+    ["Name", `${p.first_name} ${p.last_name}`], ["Date of birth", p.date_of_birth], ["Sex", p.sex],
+    ["Phone", fmtPhone(p.phone_number)], ["Email", p.email],
+    ["Address", [p.address_line_1, p.address_line_2].filter(Boolean).join(", ")],
+    ["City / State / ZIP", `${p.city}, ${p.state} ${p.zip_code}`],
+    ["Insurance", [p.insurance_provider, p.insurance_member_id].filter(Boolean).join(" · ")],
+    ["Language", p.preferred_language],
+    ["Emergency contact", [p.emergency_contact_name, fmtPhone(p.emergency_contact_phone)].filter(Boolean).join(" · ")],
+    ["Patient ID", p.patient_id], ["Updated (UTC)", p.updated_at],
+  ];
+  for (const [k, v] of fields) { dl.append(el("dt", k), el("dd", v || "—")); }
+  box.append(dl);
+  try {
+    const [calls, appts] = await Promise.all([api(`/patients/${p.patient_id}/calls`), api(`/patients/${p.patient_id}/appointments`)]);
+    for (const a of appts) {
+      const d = el("dl"); d.append(el("dt", "Appointment"), el("dd", `${new Date(a.starts_at).toLocaleString()} · ${a.provider_name}`)); box.append(d);
+    }
+    for (const c of calls) {
+      const d = el("dl");
+      d.append(el("dt", "Call"), el("dd", `${c.outcome || ""} · ${c.ended_reason || "in progress"} · ${c.started_at.slice(0,16).replace("T"," ")}`));
+      if (c.summary) d.append(el("dt", "Summary"), el("dd", c.summary));
+      box.append(d);
+      if (c.transcript) box.append(el("pre", c.transcript));
+    }
+    if (!calls.length) box.append(el("div", "No calls linked (created via API or seed data).", "empty muted"));
+  } catch (e) { box.append(el("div", "Could not load calls: " + e.message, "empty muted")); }
+}
+
+$("#filters").onsubmit = (e) => { e.preventDefault(); loadPatients(); };
+loadPatients();
+setInterval(loadPatients, 15000);
+</script>
+</body>
+</html>

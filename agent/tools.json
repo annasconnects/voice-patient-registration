@@ -1,0 +1,339 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "validate_fields",
+      "description": "Check one or more patient fields as soon as the caller provides them (at minimum: after date of birth, and after the full address). Returns normalized values for valid fields and a plain-language problem for invalid ones. Does not save anything.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "Patient's first name, spelled as confirmed by the caller."
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Patient's last name, spelled as confirmed by the caller."
+          },
+          "date_of_birth": {
+            "type": "string",
+            "description": "Date of birth as MM/DD/YYYY."
+          },
+          "sex": {
+            "type": "string",
+            "description": "Exactly one of: Male, Female, Other, Decline to Answer."
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "10-digit U.S. phone number, digits only, e.g. 5125550143."
+          },
+          "email": {
+            "type": "string",
+            "description": "Optional. Email address in lowercase, e.g. jane.doe@gmail.com."
+          },
+          "address_line_1": {
+            "type": "string",
+            "description": "Street address, e.g. 742 Evergreen Terrace."
+          },
+          "address_line_2": {
+            "type": "string",
+            "description": "Optional. Apartment, suite or unit, e.g. Apt 3B."
+          },
+          "city": {
+            "type": "string",
+            "description": "City name."
+          },
+          "state": {
+            "type": "string",
+            "description": "2-letter U.S. state code, e.g. TX."
+          },
+          "zip_code": {
+            "type": "string",
+            "description": "5-digit ZIP or ZIP+4, e.g. 78701 or 78701-1234."
+          },
+          "insurance_provider": {
+            "type": "string",
+            "description": "Optional. Name of the insurance company."
+          },
+          "insurance_member_id": {
+            "type": "string",
+            "description": "Optional. Alphanumeric insurance member/subscriber ID."
+          },
+          "preferred_language": {
+            "type": "string",
+            "description": "Optional. Preferred language, e.g. English or Spanish."
+          },
+          "emergency_contact_name": {
+            "type": "string",
+            "description": "Optional. Emergency contact's full name."
+          },
+          "emergency_contact_phone": {
+            "type": "string",
+            "description": "Optional. Emergency contact's 10-digit U.S. phone number, digits only."
+          }
+        }
+      }
+    },
+    "messages": []
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "lookup_patient_by_phone",
+      "description": "Check whether a patient record already exists for a phone number. Call immediately after collecting the caller's phone number.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "description": "10-digit U.S. phone number, digits only, e.g. 5125550143."
+          }
+        },
+        "required": [
+          "phone_number"
+        ]
+      }
+    },
+    "messages": []
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "register_patient",
+      "description": "Save a NEW patient record. Only call after reading all information back to the caller and receiving explicit confirmation that it is correct. Include every field collected; omit optional fields not provided.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "Patient's first name, spelled as confirmed by the caller."
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Patient's last name, spelled as confirmed by the caller."
+          },
+          "date_of_birth": {
+            "type": "string",
+            "description": "Date of birth as MM/DD/YYYY."
+          },
+          "sex": {
+            "type": "string",
+            "description": "Exactly one of: Male, Female, Other, Decline to Answer.",
+            "enum": [
+              "Male",
+              "Female",
+              "Other",
+              "Decline to Answer"
+            ]
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "10-digit U.S. phone number, digits only, e.g. 5125550143."
+          },
+          "email": {
+            "type": "string",
+            "description": "Optional. Email address in lowercase, e.g. jane.doe@gmail.com."
+          },
+          "address_line_1": {
+            "type": "string",
+            "description": "Street address, e.g. 742 Evergreen Terrace."
+          },
+          "address_line_2": {
+            "type": "string",
+            "description": "Optional. Apartment, suite or unit, e.g. Apt 3B."
+          },
+          "city": {
+            "type": "string",
+            "description": "City name."
+          },
+          "state": {
+            "type": "string",
+            "description": "2-letter U.S. state code, e.g. TX."
+          },
+          "zip_code": {
+            "type": "string",
+            "description": "5-digit ZIP or ZIP+4, e.g. 78701 or 78701-1234."
+          },
+          "insurance_provider": {
+            "type": "string",
+            "description": "Optional. Name of the insurance company."
+          },
+          "insurance_member_id": {
+            "type": "string",
+            "description": "Optional. Alphanumeric insurance member/subscriber ID."
+          },
+          "preferred_language": {
+            "type": "string",
+            "description": "Optional. Preferred language, e.g. English or Spanish."
+          },
+          "emergency_contact_name": {
+            "type": "string",
+            "description": "Optional. Emergency contact's full name."
+          },
+          "emergency_contact_phone": {
+            "type": "string",
+            "description": "Optional. Emergency contact's 10-digit U.S. phone number, digits only."
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "date_of_birth",
+          "sex",
+          "phone_number",
+          "address_line_1",
+          "city",
+          "state",
+          "zip_code"
+        ]
+      }
+    },
+    "messages": [
+      {
+        "type": "request-failed",
+        "content": "I'm sorry, I'm having trouble saving that on our end. Would you like me to try again?"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "update_patient",
+      "description": "Update an EXISTING patient's record (found via lookup_patient_by_phone) after the caller confirms the changes. Send patient_id and only the fields that changed.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "description": "patient_id returned by lookup_patient_by_phone."
+          },
+          "first_name": {
+            "type": "string",
+            "description": "Patient's first name, spelled as confirmed by the caller."
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Patient's last name, spelled as confirmed by the caller."
+          },
+          "date_of_birth": {
+            "type": "string",
+            "description": "Date of birth as MM/DD/YYYY."
+          },
+          "sex": {
+            "type": "string",
+            "description": "Exactly one of: Male, Female, Other, Decline to Answer.",
+            "enum": [
+              "Male",
+              "Female",
+              "Other",
+              "Decline to Answer"
+            ]
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "10-digit U.S. phone number, digits only, e.g. 5125550143."
+          },
+          "email": {
+            "type": "string",
+            "description": "Optional. Email address in lowercase, e.g. jane.doe@gmail.com."
+          },
+          "address_line_1": {
+            "type": "string",
+            "description": "Street address, e.g. 742 Evergreen Terrace."
+          },
+          "address_line_2": {
+            "type": "string",
+            "description": "Optional. Apartment, suite or unit, e.g. Apt 3B."
+          },
+          "city": {
+            "type": "string",
+            "description": "City name."
+          },
+          "state": {
+            "type": "string",
+            "description": "2-letter U.S. state code, e.g. TX."
+          },
+          "zip_code": {
+            "type": "string",
+            "description": "5-digit ZIP or ZIP+4, e.g. 78701 or 78701-1234."
+          },
+          "insurance_provider": {
+            "type": "string",
+            "description": "Optional. Name of the insurance company."
+          },
+          "insurance_member_id": {
+            "type": "string",
+            "description": "Optional. Alphanumeric insurance member/subscriber ID."
+          },
+          "preferred_language": {
+            "type": "string",
+            "description": "Optional. Preferred language, e.g. English or Spanish."
+          },
+          "emergency_contact_name": {
+            "type": "string",
+            "description": "Optional. Emergency contact's full name."
+          },
+          "emergency_contact_phone": {
+            "type": "string",
+            "description": "Optional. Emergency contact's 10-digit U.S. phone number, digits only."
+          }
+        },
+        "required": [
+          "patient_id"
+        ]
+      }
+    },
+    "messages": [
+      {
+        "type": "request-failed",
+        "content": "I'm sorry, I couldn't save that update just now. Would you like me to try again?"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_available_appointments",
+      "description": "Get up to three open first-visit appointment times. Only after the patient has been saved.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "preferred_day": {
+            "type": "string",
+            "description": "Optional preference such as 'tomorrow', 'Tuesday', 'Thursday morning', 'afternoon'."
+          }
+        }
+      }
+    },
+    "messages": []
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "book_appointment",
+      "description": "Book the appointment slot the caller chose.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "description": "patient_id returned by register_patient or lookup_patient_by_phone."
+          },
+          "slot_id": {
+            "type": "string",
+            "description": "slot_id from get_available_appointments."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional short reason for the visit, e.g. 'new patient checkup'."
+          }
+        },
+        "required": [
+          "patient_id",
+          "slot_id"
+        ]
+      }
+    },
+    "messages": []
+  }
+]
